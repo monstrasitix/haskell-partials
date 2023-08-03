@@ -32,7 +32,7 @@ lastNames =
         ]
 
 randomString :: IO String
-randomString = flip replicateM (randomRIO (' ', '~')) =<< randomRIO (1, 32)
+randomString = flip replicateM (randomRIO ('A', 'z')) =<< randomRIO (1, 32)
 
 randomFromList :: MonadIO m => [a] -> m a
 randomFromList xs =
