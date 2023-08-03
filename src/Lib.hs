@@ -8,9 +8,9 @@ import           Data.Aeson
 import           Data.Functor
 import           JSON
 import           Random
-import qualified Data.Text                  as T
-import qualified Data.UUID                  as U
-import qualified Data.UUID.V4               as U4
+import qualified Data.Text    as T
+import qualified Data.UUID    as U
+import qualified Data.UUID.V4 as U4
 
 data User = User
     { userId            :: String

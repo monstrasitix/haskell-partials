@@ -11,7 +11,7 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Functor
 import           System.Random
-import qualified Data.Text as T
+import qualified Data.Text              as T
 
 firstNames :: [T.Text]
 firstNames =
@@ -32,7 +32,7 @@ lastNames =
         ]
 
 randomString :: IO String
-randomString = flip replicateM (randomRIO (' ','~')) =<< randomRIO (1, 32)
+randomString = flip replicateM (randomRIO (' ', '~')) =<< randomRIO (1, 32)
 
 randomFromList :: MonadIO m => [a] -> m a
 randomFromList xs =
