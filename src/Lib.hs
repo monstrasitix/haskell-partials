@@ -13,11 +13,11 @@ import qualified Data.UUID    as U
 import qualified Data.UUID.V4 as U4
 
 data User = User
-    { userId            :: String
-    , userFirstName     :: T.Text
-    , userLastName      :: T.Text
-    , userPasswordHash  :: T.Text
-    , userSalt          :: String
+    { userId           :: String
+    , userFirstName    :: T.Text
+    , userLastName     :: T.Text
+    , userPasswordHash :: T.Text
+    , userSalt         :: String
     } deriving Show
 
 data PartialUser = PartialUser
@@ -80,17 +80,28 @@ generatePartialUser = do
         (userFirstName user)
         (userLastName user)
 
-userFromPartial :: User -> PartialUser
-userFromPartial x = PartialUser
+partialFromUser :: User -> PartialUser
+partialFromUser x = PartialUser
     (userId x)
     (userFirstName x)
     (userLastName x)
 
--- partialToUser ???
+-- userFromPartial ??
+
+userFromPartial :: PartialUser -> User
+userFromPartial x = User
+    (partialUserId x)
+    (partialUserFirstName x)
+    (partialUserLastName x)
+    ""
+    ""
 
 initialize :: IO ()
 initialize = do
-    user <- generateUser
+    user    <- generateUser
+    partial <- generatePartialUser
     printJSON user
-    printJSON (userFromPartial user)
-    generatePartialUser >>= printJSON
+    printJSON (partialFromUser user)
+    printJSON partial
+    printJSON (userFromPartial partial)
+
