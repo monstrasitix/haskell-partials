@@ -2,106 +2,43 @@
 
 module Lib
     ( initialize
+    , fetchTodo
+    , fetchUser
+    , fetchJSON2
     ) where
 
 import           Data.Aeson
 import           Data.Functor
-import           JSON
-import           Random
-import qualified Data.Text    as T
-import qualified Data.UUID    as U
-import qualified Data.UUID.V4 as U4
+import           Model.Todo
+import           Model.User
+import           Network.HTTP.Client
+import           Network.HTTP.Client.TLS
 
-data User = User
-    { userId           :: String
-    , userFirstName    :: T.Text
-    , userLastName     :: T.Text
-    , userPasswordHash :: T.Text
-    , userSalt         :: String
-    } deriving Show
+tlsManagerIO :: IO Manager
+tlsManagerIO = newTlsManagerWith tlsManagerSettings
 
-data PartialUser = PartialUser
-    { partialUserId        :: String
-    , partialUserFirstName :: T.Text
-    , partialUserLastName  :: T.Text
-    } deriving Show
+fetchJSON :: FromJSON a => String -> IO (Maybe a)
+fetchJSON url = do
+    manager <- tlsManagerIO
+    request <- parseRequest url
+    httpLbs request manager <&> decode . responseBody
 
-instance FromJSON User where
-    parseJSON = withObject "User" $ \v ->
-        User
-            <$> v .: "id"
-            <*> v .: "firstName"
-            <*> v .: "lastName"
-            <*> v .: "passwordHash"
-            <*> v .: "salt"
+fetchJSON2 :: FromJSON a => String -> IO (Maybe a)
+fetchJSON2 url = do
+    response <- httpLbs <$> parseRequest url <*> tlsManagerIO
+    response <&> decode . responseBody
 
-instance FromJSON PartialUser where
-    parseJSON = withObject "PartialUser" $ \v ->
-        PartialUser
-            <$> v .: "id"
-            <*> v .: "firstName"
-            <*> v .: "lastName"
+fetchTodo :: Int -> IO (Maybe Todo)
+fetchTodo id_ = fetchJSON $ "https://jsonplaceholder.typicode.com/todos/" ++ show id_
 
-instance ToJSON User where
-    toJSON x = object
-        [ "id"           .= userId x
-        , "firstName"    .= userFirstName x
-        , "lastName"     .= userLastName x
-        , "passwordHash" .= userPasswordHash x
-        , "salt"         .= userSalt x
-        ]
-
-instance ToJSON PartialUser where
-    toJSON x = object
-        [ "id"        .= partialUserId x
-        , "firstName" .= partialUserFirstName x
-        , "lastName"  .= partialUserLastName x
-        ]
-
-generateUser :: IO User
-generateUser = do
-    identifier   <- U4.nextRandom <&> U.toString
-    password     <- randomString  <&> T.pack
-    passwordSalt <- randomString
-    firstName    <- randomFromList firstNames
-    lastName     <- randomFromList lastNames
-    return $ User
-        identifier
-        firstName
-        lastName
-        password
-        passwordSalt
-
-generatePartialUser :: IO PartialUser
-generatePartialUser = do
-    user <- generateUser
-    return $ PartialUser
-        (userId user)
-        (userFirstName user)
-        (userLastName user)
-
-partialFromUser :: User -> PartialUser
-partialFromUser x = PartialUser
-    (userId x)
-    (userFirstName x)
-    (userLastName x)
-
--- userFromPartial ??
-
-userFromPartial :: PartialUser -> User
-userFromPartial x = User
-    (partialUserId x)
-    (partialUserFirstName x)
-    (partialUserLastName x)
-    ""
-    ""
+fetchUser :: Int -> IO (Maybe User)
+fetchUser id_ = fetchJSON $ "https://jsonplaceholder.typicode.com/users/" ++ show id_
 
 initialize :: IO ()
 initialize = do
-    user    <- generateUser
-    partial <- generatePartialUser
-    printJSON user
-    printJSON (partialFromUser user)
-    printJSON partial
-    printJSON (userFromPartial partial)
+    let
+        result :: Maybe Int
+        result = (+) <$> Just 4 <*> Just 9
+    print result
+    fetchUser 1 >>= print
 
