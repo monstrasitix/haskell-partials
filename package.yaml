@@ -26,6 +26,8 @@ dependencies:
 - http-client
 - http-client-tls
 - http-types
+- bytestring
+- binary
 
 ghc-options:
 - -Wall
@@ -63,3 +65,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - haskell-partials
+    - HUnit

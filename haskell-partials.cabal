@@ -28,6 +28,7 @@ library
       Lib
       Model.Todo
       Model.User
+      Playful
   other-modules:
       Paths_haskell_partials
   hs-source-dirs:
@@ -36,6 +37,8 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , binary
+    , bytestring
     , http-client
     , http-client-tls
     , http-types
@@ -52,6 +55,8 @@ executable haskell-partials-exe
   build-depends:
       aeson
     , base >=4.7 && <5
+    , binary
+    , bytestring
     , haskell-partials
     , http-client
     , http-client-tls
@@ -63,13 +68,17 @@ test-suite haskell-partials-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      PlayfulTest
       Paths_haskell_partials
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wno-unrecognised-pragmas -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson
+      HUnit
+    , aeson
     , base >=4.7 && <5
+    , binary
+    , bytestring
     , haskell-partials
     , http-client
     , http-client-tls

@@ -2,43 +2,45 @@
 
 module Lib
     ( initialize
-    , fetchTodo
-    , fetchUser
-    , fetchJSON2
+    , userRequest
+    , fetch
     ) where
 
 import           Data.Aeson
 import           Data.Functor
-import           Model.Todo
 import           Model.User
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS
+import qualified Data.ByteString.Char8 as BB
 
-tlsManagerIO :: IO Manager
-tlsManagerIO = newTlsManagerWith tlsManagerSettings
 
-fetchJSON :: FromJSON a => String -> IO (Maybe a)
-fetchJSON url = do
-    manager <- tlsManagerIO
-    request <- parseRequest url
+tlsRequest :: Request
+tlsRequest = defaultRequest
+    { secure = True
+    , port = 443
+    }
+
+userRequest :: Int -> Request
+userRequest xx = tlsRequest
+    { host = "jsonplaceholder.typicode.com"
+    , path = "/users/" <> BB.pack (show xx)
+    }
+
+usersRequest :: Request
+usersRequest = tlsRequest
+    { host = "jsonplaceholder.typicode.com"
+    , path = "/users"
+    }
+
+
+fetch :: FromJSON a => Request -> IO (Maybe a)
+fetch request = do
+    manager <- newTlsManager
     httpLbs request manager <&> decode . responseBody
 
-fetchJSON2 :: FromJSON a => String -> IO (Maybe a)
-fetchJSON2 url = do
-    response <- httpLbs <$> parseRequest url <*> tlsManagerIO
-    response <&> decode . responseBody
-
-fetchTodo :: Int -> IO (Maybe Todo)
-fetchTodo id_ = fetchJSON $ "https://jsonplaceholder.typicode.com/todos/" ++ show id_
-
-fetchUser :: Int -> IO (Maybe User)
-fetchUser id_ = fetchJSON $ "https://jsonplaceholder.typicode.com/users/" ++ show id_
 
 initialize :: IO ()
 initialize = do
-    let
-        result :: Maybe Int
-        result = (+) <$> Just 4 <*> Just 9
-    print result
-    fetchUser 1 >>= print
+    (fetch (userRequest 1) :: IO (Maybe User)) >>= print
+    (fetch usersRequest :: IO (Maybe [User])) >>= print
 
